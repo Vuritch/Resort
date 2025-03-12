@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="text-center">{{ title }}</h1>
+    <p class="text-center">Welcome to our website! Feel free to navigate to other pages.</p>
+    <!-- Display flash messages -->
+  
+    <div class="text-center">
+        <a href="{{ url_for('login') }}" class="btn btn-primary">Login</a>
+        <a href="{{ url_for('register') }}" class="btn btn-secondary">Sign Up</a>
+    </div>
+</div>
+{% endblock %}
