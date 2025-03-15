@@ -15,7 +15,7 @@ def about():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-    if form.validate_on_submit():  # Call the method
+    if form.validate_on_submit():
         if form.email.data == "omarabderhman123@gmail.com" and form.password.data == "123456":
             flash(f'Login Successful for {form.email.data}', 'success') 
             return redirect(url_for('index'))
