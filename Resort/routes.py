@@ -1,8 +1,7 @@
-from flask import Flask, render_template, flash, url_for, redirect
-from forms import RegisterForm, LoginForm
-
-app = Flask(__name__)
-app.config['SECRET_KEY'] = "b339f8784e4baa72e389743af5b2ddbfa4271aa615838d7fec426f1aa6530955"
+from flask import  render_template, flash, redirect, url_for
+from Resort.models import User, Blog
+from Resort.forms import RegisterForm, LoginForm
+from Resort import app
 
 @app.route('/', methods=['GET'])
 def index():
@@ -29,8 +28,5 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         flash(f'An Account created for {form.name.data}', 'success')
-        return redirect(url_for('index'))
+        return redirect(url_for('login'))
     return render_template("register.html", title="Register", form=form)
-
-if __name__ == "__main__":
-    app.run(debug=True)
