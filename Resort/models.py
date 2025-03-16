@@ -1,25 +1,29 @@
+from flask_sqlalchemy import SQLAlchemy
+from flask import Flask
 from datetime import datetime
 from Resort import db
 
 class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(255), nullable=False)
-    phone = db.Column(db.String(11),unique=True, nullable=False)
-    email = db.Column(db.String(255), unique=True, nullable=False)
-    image = db.Column(db.String(20), nullable=False, default="user.jpg")
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(20), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
-    blogs = db.relationship('Blog', backref='author', lazy=True)
+    posts = db.relationship('Post', backref='author', lazy=True)
 
     def __repr__(self):
-        return f"User ( {self.name}, {self.email}, {self.image} )"
+        return f"User('{self.username}', '{self.email}')"
 
-class Blog(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    title = db.Column(db.String(255), nullable=False)
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     content = db.Column(db.Text, nullable=False)
-    image = db.Column(db.String(20), nullable=False, default="blog.png")
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False )
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
-        return f"Blog ( {self.title}, {self.created_at} )"
+        return f"Post('{self.title}', '{self.date_posted}')"
+
+# Initialize the database
+def init_db():
+    db.create_all()
+    print("Database tables created!")
