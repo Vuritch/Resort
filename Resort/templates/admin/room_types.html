@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block body %}
+  <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mb-3">← Dashboard</a>
+  <h2>Room Types</h2>
+  <a href="{{ url_for('admin_create_room_type') }}" class="btn btn-primary mb-3">+ New Room Type</a>
+  <table class="table table-hover">
+    <thead class="table-light">
+      <tr><th>ID</th><th>Name</th><th>Price</th><th>Max Guests</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for rt in room_types %}
+      <tr>
+        <td>{{ rt.id }}</td>
+        <td>{{ rt.name }}</td>
+        <td>${{ rt.base_price }}</td>
+        <td>{{ rt.max_guests }}</td>
+        <td>
+          <a href="{{ url_for('admin_edit_room_type', type_id=rt.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+          <a href="{{ url_for('admin_delete_room_type', type_id=rt.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete?');">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

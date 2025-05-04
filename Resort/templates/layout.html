@@ -37,6 +37,16 @@
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if request.endpoint == 'booking' }}" href="{{ url_for('booking') }}">Book Now</a>
                     </li>
+
+                    {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                    <li class="nav-item">
+                      <a class="nav-link {{ 'active' if request.endpoint == 'admin_dashboard' }}"
+                         href="{{ url_for('admin_dashboard') }}">
+                        Admin Dashboard
+                      </a>
+                    </li>
+                    {% endif %}
+
                 </ul>
                 <div class="d-flex">
                     {% if current_user.is_authenticated %}

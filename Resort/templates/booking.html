@@ -279,6 +279,8 @@
 }
 </style>
 
+
+<!-- Room display section (dynamic) -->
 <div class="booking-hero">
     <div>
         <h1 class="booking-title">Book Your Dream Stay</h1>
@@ -303,315 +305,141 @@
             <div class="col-lg-8">
                 <div class="booking-card">
                     <h2 class="mb-4">Select Your Perfect Room</h2>
-                    
-                    <!-- Standard Room -->
-                    <div class="room-type" data-price="199">
-                        <div class="row">
+                    {% for room in room_types %}
+                    <div class="room-type {% if loop.first %}selected{% endif %}" 
+                    data-price="{{ room.base_price }}" 
+                    data-room-type-id="{{ room.id }}">
+                                       <div class="row">
                             <div class="col-md-12">
-                                <img src="{{ url_for('static', filename='images/bilderboken-rlwE8f8anOc-unsplash.jpg') }}" alt="Standard Room" class="main-image">
+                                {% if room.is_luxury %}
+                                    <span class="badge-luxury">{{ room.luxury_label or '★ Luxury' }}</span>
+                                {% endif %}
+                                <img src="{{ url_for('static', filename='uploads/' + room.main_image) }}" class="main-image" alt="{{ room.name }}">
                                 <div class="room-gallery">
-                                    <img src="{{ url_for('static', filename='images/sara-dubler-Koei_7yYtIo-unsplash.jpg') }}" alt="Bathroom">
-                                    <img src="{{ url_for('static', filename='images/chelsea-gates-0653_wY0nRc-unsplash.jpg') }}" alt="View">
-                                    <img src="{{ url_for('static', filename='images/paolo-nicolello-2gOxKj594nM-unsplash.jpg') }}" alt="Details">
+                                    {% for img in room.gallery_images.split(',') %}
+                                    <img src="{{ url_for('static', filename='uploads/' + img) }}" alt="Gallery">
+                                    {% endfor %}
                                 </div>
                             </div>
                             <div class="col-md-12 mt-3">
-                                <h3>Standard Garden View</h3>
-                                <span class="room-capacity"><i class="fas fa-user"></i> Max Occupancy: 2 Adults</span>
-                                <p class="room-description">
-                                    Embrace comfort in our well-appointed standard rooms, featuring garden views and modern amenities for a peaceful stay.
-                                </p>
+                                <h3>{{ room.name }}</h3>
+                                <span class="room-capacity"><i class="fas fa-user"></i> Max Occupancy: {{ room.max_guests }}</span>
+                                <p class="room-description">{{ room.description }}</p>
                                 <div class="room-features">
+                                    {% for feature in room.features.split(',') %}
                                     <div class="feature-item">
-                                        <i class="fas fa-bed"></i>
-                                        <span>Queen Bed</span>
+                                        <i class="fas fa-check"></i>
+                                        <span>{{ feature }}</span>
                                     </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-wifi"></i>
-                                        <span>Free WiFi</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-tv"></i>
-                                        <span>Smart TV</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-coffee"></i>
-                                        <span>Coffee Maker</span>
-                                    </div>
+                                    {% endfor %}
                                 </div>
-                                <div class="price-tag">$199/night</div>
+                                <div class="price-tag">${{ room.price }}/night</div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Deluxe Ocean View -->
-                    <div class="room-type selected" data-price="299">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <img src="{{ url_for('static', filename='images/xavier-coiffic-lQ4mfS5Le6M-unsplash.jpg') }}" alt="Deluxe Room" class="main-image">
-                                <div class="room-gallery">
-                                    <img src="{{ url_for('static', filename='images/sara-dubler-Koei_7yYtIo-unsplash.jpg') }}" alt="Bathroom">
-                                    <img src="{{ url_for('static', filename='images/zero-take-WvHrrR1C5Po-unsplash.jpg') }}" alt="Balcony">
-                                    <img src="{{ url_for('static', filename='images/sasha-kaunas-TAgGZWz6Qg8-unsplash.jpg') }}" alt="Ocean View">
-                                </div>
-                            </div>
-                            <div class="col-md-12 mt-3">
-                                <h3>Deluxe Ocean View</h3>
-                                <span class="room-capacity"><i class="fas fa-user"></i> Max Occupancy: 3 Adults or 2 Adults + 2 Children</span>
-                                <p class="room-description">
-                                    Indulge in luxury with our spacious deluxe rooms, featuring breathtaking ocean views and a private balcony perfect for sunset watching.
-                                </p>
-                                <div class="room-features">
-                                    <div class="feature-item">
-                                        <i class="fas fa-bed"></i>
-                                        <span>King Bed</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-water"></i>
-                                        <span>Ocean View</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-wifi"></i>
-                                        <span>Free WiFi</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-swimming-pool"></i>
-                                        <span>Pool Access</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-bath"></i>
-                                        <span>Luxury Bath</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-coffee"></i>
-                                        <span>Mini Bar</span>
-                                    </div>
-                                </div>
-                                <div class="price-tag">$299/night</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Executive Suite -->
-                    <div class="room-type" data-price="499">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <span class="badge-luxury">★ Luxury Pick</span>
-                                <img src="{{ url_for('static', filename='images/the-anam-_twiIcIsp2s-unsplash.jpg') }}" alt="Executive Suite" class="main-image">
-                                <div class="room-gallery">
-                                    <img src="{{ url_for('static', filename='images/nico-smit-W7xyonOUUWs-unsplash.jpg') }}" alt="Living Area">
-                                    <img src="{{ url_for('static', filename='images/sara-dubler-Koei_7yYtIo-unsplash.jpg') }}" alt="Bathroom">
-                                    <img src="{{ url_for('static', filename='images/pool.png') }}" alt="Private Pool">
-                                    <img src="{{ url_for('static', filename='images/sasha-kaunas-TAgGZWz6Qg8-unsplash.jpg') }}" alt="View">
-                                </div>
-                            </div>
-                            <div class="col-md-12 mt-3">
-                                <h3>Executive Suite with Private Pool</h3>
-                                <span class="room-capacity"><i class="fas fa-user"></i> Max Occupancy: 4 Adults or 2 Adults + 3 Children</span>
-                                <p class="room-description">
-                                    Experience ultimate luxury in our executive suites, featuring a private infinity pool, separate living area, and premium amenities for an unforgettable stay.
-                                </p>
-                                <div class="room-features">
-                                    <div class="feature-item">
-                                        <i class="fas fa-bed"></i>
-                                        <span>King Bed</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-couch"></i>
-                                        <span>Living Room</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-swimming-pool"></i>
-                                        <span>Private Pool</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-concierge-bell"></i>
-                                        <span>Butler Service</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-utensils"></i>
-                                        <span>Kitchen</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-glass-martini-alt"></i>
-                                        <span>Premium Bar</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-spa"></i>
-                                        <span>Spa Access</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-car"></i>
-                                        <span>Free Transfer</span>
-                                    </div>
-                                </div>
-                                <div class="price-tag">$499/night</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Presidential Villa -->
-                    <div class="room-type" data-price="999">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <span class="badge-luxury">★★★ Ultimate Luxury</span>
-                                <img src="{{ url_for('static', filename='images/fabio-fistarol-qai_Clhyq0s-unsplash.jpg') }}" alt="Presidential Villa" class="main-image">
-                                <div class="room-gallery">
-                                    <img src="{{ url_for('static', filename='images/pool.png') }}" alt="Villa Pool">
-                                    <img src="{{ url_for('static', filename='images/tim-mossholder-5yWwAqTjP20-unsplash.jpg') }}" alt="Dining">
-                                    <img src="{{ url_for('static', filename='images/cory-bjork-D1yT791Nf9A-unsplash.jpg') }}" alt="Bedroom">
-                                    <img src="{{ url_for('static', filename='images/sara-dubler-Koei_7yYtIo-unsplash.jpg') }}" alt="Bathroom">
-                                </div>
-                            </div>
-                            <div class="col-md-12 mt-3">
-                                <h3>Presidential Beach Villa</h3>
-                                <span class="room-capacity"><i class="fas fa-user"></i> Max Occupancy: 6 Adults or 4 Adults + 4 Children</span>
-                                <p class="room-description">
-                                    Our most exclusive accommodation, this beachfront villa offers unparalleled luxury with multiple bedrooms, a private beach area, and personalized services for the most discerning guests.
-                                </p>
-                                <div class="room-features">
-                                    <div class="feature-item">
-                                        <i class="fas fa-home"></i>
-                                        <span>3 Bedrooms</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-swimming-pool"></i>
-                                        <span>Infinity Pool</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-umbrella-beach"></i>
-                                        <span>Private Beach</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-concierge-bell"></i>
-                                        <span>24/7 Butler</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-helicopter"></i>
-                                        <span>Helipad Access</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-utensils"></i>
-                                        <span>Private Chef</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-spa"></i>
-                                        <span>Private Spa</span>
-                                    </div>
-                                    <div class="feature-item">
-                                        <i class="fas fa-car"></i>
-                                        <span>Luxury Transfer</span>
-                                    </div>
-                                </div>
-                                <div class="price-tag">$999/night</div>
-                            </div>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
-            
+
+            <!-- Booking Form Column (unchanged, except room_type_id usage) -->
             <div class="col-lg-4">
                 <div class="booking-card">
                     <h2 class="mb-4">Booking Details</h2>
                     <form method="POST" id="bookingForm">
-                        <input type="hidden" name="room_type" id="roomType" value="Deluxe Ocean View">
-                        <input type="hidden" name="total_price" id="totalPrice" value="0">
-                        <input type="hidden" name="room_rate" id="roomRateInput" value="0">
+                        <input type="hidden" name="room_type_id" id="roomTypeId" value="{{ room_types[0].id if room_types|length > 0 else '' }}">
+                        <input type="hidden" name="total_price" id="totalPrice" value="...">
+                        <input type="hidden" name="room_rate" id="roomRateInput" value="...">
                         <input type="hidden" name="taxes_and_fees" id="taxesAndFeesInput" value="0">
                         <input type="hidden" name="dining_total" id="diningTotalInput" value="0">
                         <input type="hidden" name="services_total" id="servicesTotalInput" value="0">
-                        
+            
                         <div class="form-group">
                             <label class="form-label">Check-in Date</label>
                             <input type="date" name="check_in" class="form-control" required min="{{ today }}">
                             <div class="date-warning" id="checkInWarning">Date must be in the future</div>
                             <small class="text-muted">Check-in time: 2:00 PM</small>
                         </div>
-                        
+            
                         <div class="form-group">
                             <label class="form-label">Check-out Date</label>
                             <input type="date" name="check_out" class="form-control" required>
                             <div class="date-warning" id="checkOutWarning">Must be after check-in date</div>
                             <small class="text-muted">Check-out time: 12:00 PM</small>
                         </div>
+            
+                        <!-- ✅ Dynamic Room Number Dropdown -->
+                        <div class="form-group">
+                            <label class="form-label">Select Room Number</label>
+                            <select name="room_id" class="form-control" required>
+                                {% for rt in room_types %}
+                                    {% for room in rt.rooms %}
+                                        {% if room.is_available %}
+                                            <option value="{{ room.id }}">Room {{ room.room_number }} - {{ rt.name }} - Floor {{ room.floor }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </select>
+                        </div>
+            
+                        <!-- Dynamic Guests -->
+            <div class="form-group">
+                <label class="form-label">Guest Information</label>
+                <select name="guests" id="guestOptionSelect" class="form-control mb-2" required>
+                  <option disabled selected>Select number of guests</option>
+                  {% for go in guest_options %}
+                    <option value="{{ go.id }}"
+                            data-adults="{{ go.adult_count }}"
+                            data-children="{{ go.child_count }}">
+                      {{ go.label }}
+                    </option>
+                  {% endfor %}
+                </select>
+                <small class="text-muted">Children under 2 stay free in existing beds</small>
+              </div>
+                          
+  
+              <!-- Bed preference -->
+              <div class="form-group">
+                <label>Bed Preference</label>
+                <select name="bed_preference" class="form-control">
+                  {% for bed in bed_extras %}
+                    <option value="{{ bed.name|lower }}">
+                      {{ bed.name }}
+                      {% if bed.price > 0 %}(+${{ bed.price }}/night){% endif %}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+                       <!-- Dining Packages (Radio - only one) -->
+<div class="form-group">
+    <label class="form-label">Dining Packages</label>
+    {% for extra in dining_extras %}
+    <div class="form-check">
+        <input class="form-check-input dining-option" type="radio" name="dining_package" value="{{ extra.id }}" id="dining_{{ extra.id }}" data-price="{{ extra.price }}">
+        <label class="form-check-label" for="dining_{{ extra.id }}">
+            {{ extra.name }} (${{ extra.price }})
+            <small class="d-block text-muted">{{ extra.description }}</small>
+        </label>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Additional Services (Multiple) -->
+<div class="form-group">
+    <label class="form-label">Additional Services</label>
+    {% for extra in service_extras %}
+    <div class="form-check">
+        <input class="form-check-input service-option" type="checkbox" name="extras" value="{{ extra.id }}" id="extra_{{ extra.id }}" data-price="{{ extra.price }}" data-name="{{ extra.name }}">
+        <label class="form-check-label" for="extra_{{ extra.id }}">
+            {{ extra.name }} (${{ extra.price }})
+            <small class="d-block text-muted">{{ extra.description }}</small>
+        </label>
+    </div>
+    {% endfor %}
+</div>
+
                         
-                        <div class="form-group">
-                            <label class="form-label">Guest Information</label>
-                            <select name="guests" class="form-control mb-2" required>
-                                <option value="1 Adult">1 Adult</option>
-                                <option value="2 Adults">2 Adults</option>
-                                <option value="2 Adults, 1 Child">2 Adults, 1 Child</option>
-                                <option value="2 Adults, 2 Children">2 Adults, 2 Children</option>
-                                <option value="3 Adults">3 Adults</option>
-                                <option value="4 Adults">4 Adults (Executive Suite only)</option>
-                            </select>
-                            <select name="child_ages" class="form-control" multiple>
-                                <option disabled>Child Ages (if applicable)</option>
-                                <option value="infant">Under 2 years (Free)</option>
-                                <option value="child2-6">2-6 years</option>
-                                <option value="child7-12">7-12 years</option>
-                            </select>
-                            <small class="text-muted">Children under 2 stay free in existing beds</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Bed Preference</label>
-                            <select name="bed_preference" class="form-control">
-                                <option value="king">King Bed</option>
-                                <option value="twin">Twin Beds</option>
-                                <option value="extra">Extra Bed (+$50/night)</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Dining Packages</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="extras" value="breakfast" id="breakfast">
-                                <label class="form-check-label" for="breakfast">
-                                    Breakfast Buffet ($25/day/person)
-                                    <small class="d-block text-muted">6:30 AM - 10:30 AM at Ocean View Restaurant</small>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="extras" value="halfboard" id="halfboard">
-                                <label class="form-check-label" for="halfboard">
-                                    Half Board ($60/day/person)
-                                    <small class="d-block text-muted">Includes breakfast and dinner</small>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="extras" value="fullboard" id="fullboard">
-                                <label class="form-check-label" for="fullboard">
-                                    Full Board ($85/day/person)
-                                    <small class="d-block text-muted">Includes all meals</small>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Additional Services</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="extras" value="airport" id="airport">
-                                <label class="form-check-label" for="airport">
-                                    Airport Transfer ($50/way)
-                                    <small class="d-block text-muted">Luxury vehicle with professional driver</small>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="extras" value="spa" id="spa">
-                                <label class="form-check-label" for="spa">
-                                    Spa Package ($150/person)
-                                    <small class="d-block text-muted">90-min massage + facial treatment</small>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="extras" value="romantic" id="romantic">
-                                <label class="form-check-label" for="romantic">
-                                    Romantic Package ($120)
-                                    <small class="d-block text-muted">Room decoration, champagne & chocolates</small>
-                                </label>
-                            </div>
-                        </div>
                         
                         <div class="form-group">
                             <label class="form-label">Special Requests</label>
@@ -686,208 +514,124 @@
         </div>
     </div>
 </div>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const roomTypes = document.querySelectorAll('.room-type');
-    const checkIn = document.querySelector('input[name="check_in"]');
-    const checkOut = document.querySelector('input[name="check_out"]');
-    const extras = document.querySelectorAll('input[name="extras"]');
-    const roomTypeInput = document.getElementById('roomType');
-    const totalPriceInput = document.getElementById('totalPrice');
-    const roomRateInput = document.getElementById('roomRateInput');
-    const taxesAndFeesInput = document.getElementById('taxesAndFeesInput');
-    const diningTotalInput = document.getElementById('diningTotalInput');
-    const servicesTotalInput = document.getElementById('servicesTotalInput');
-    const bedPreference = document.querySelector('select[name="bed_preference"]');
-    const guestsSelect = document.querySelector('select[name="guests"]');
+    document.addEventListener('DOMContentLoaded', () => {
+      const roomTypes     = document.querySelectorAll('.room-type');
+      const checkIn       = document.querySelector('input[name="check_in"]');
+      const checkOut      = document.querySelector('input[name="check_out"]');
+      const serviceBoxes  = document.querySelectorAll('input[name="extras"]');
+      const diningRadios  = document.querySelectorAll('input[name="dining_package"]');
+      const bedPrefSelect = document.querySelector('select[name="bed_preference"]');
+      const guestSelect   = document.getElementById('guestOptionSelect');
     
-    // Set minimum dates
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+      const roomTypeInput   = document.getElementById('roomTypeId');
+      const roomRateInput   = document.getElementById('roomRateInput');
+      const taxesInput      = document.getElementById('taxesAndFeesInput');
+      const diningInput     = document.getElementById('diningTotalInput');
+      const servicesInput   = document.getElementById('servicesTotalInput');
+      const totalPriceInput = document.getElementById('totalPrice');
     
-    checkIn.min = today.toISOString().split('T')[0];
-    checkOut.min = tomorrow.toISOString().split('T')[0];
-
-    function calculateDiningCost(numGuests, nights) {
-        let diningTotal = 0;
-        extras.forEach(extra => {
-            if (extra.checked) {
-                switch(extra.value) {
-                    case 'breakfast':
-                        diningTotal += 25 * numGuests * nights;
-                        break;
-                    case 'halfboard':
-                        diningTotal += 60 * numGuests * nights;
-                        break;
-                    case 'fullboard':
-                        diningTotal += 85 * numGuests * nights;
-                        break;
-                }
-            }
-        });
-        return diningTotal;
-    }
-
-    function calculateServicesCost(numGuests) {
-        let servicesTotal = 0;
-        extras.forEach(extra => {
-            if (extra.checked) {
-                switch(extra.value) {
-                    case 'airport':
-                        servicesTotal += 50;
-                        break;
-                    case 'spa':
-                        servicesTotal += 150 * numGuests;
-                        break;
-                    case 'romantic':
-                        servicesTotal += 120;
-                        break;
-                }
-            }
-        });
-        return servicesTotal;
-    }
-
-    function getNumGuests() {
-        const guestValue = guestsSelect.value;
-        let adults = 0;
-        let children = 0;
-        
-        if (guestValue.includes('4 Adults')) adults = 4;
-        else if (guestValue.includes('3 Adults')) adults = 3;
-        else if (guestValue.includes('2 Adults')) adults = 2;
-        else adults = 1;
-
-        if (guestValue.includes('2 Children')) children = 2;
-        else if (guestValue.includes('1 Child')) children = 1;
-
+      // Set min dates
+      const today    = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      checkIn.min  = today.toISOString().split('T')[0];
+      checkOut.min = tomorrow.toISOString().split('T')[0];
+    
+      function getNumGuests() {
+        const opt = guestSelect.selectedOptions[0];
+        const adults   = parseInt(opt.dataset.adults   || 0, 10);
+        const children = parseInt(opt.dataset.children || 0, 10);
         return { adults, children, total: adults + children };
-    }
-
-    function updateTotalPrice() {
-        if (!checkIn.value || !checkOut.value) return;
-
-        const selectedRoom = document.querySelector('.room-type.selected');
-        const roomPrice = parseInt(selectedRoom.dataset.price);
-        const checkInDate = new Date(checkIn.value);
-        const checkOutDate = new Date(checkOut.value);
-        const nights = (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24);
-
-        if (nights <= 0) return;
-
-        const guests = getNumGuests();
-        let roomTotal = roomPrice * nights;
-        
-        // Add extra bed cost if selected
-        if (bedPreference.value === 'extra') {
-            roomTotal += 50 * nights;
-        }
-
-        // Calculate taxes
-        const taxesAndFees = roomTotal * 0.12;
-        
-        // Calculate dining and services costs
-        const diningTotal = calculateDiningCost(guests.total, nights);
-        const servicesTotal = calculateServicesCost(guests.total);
-
-        // Update all price displays
-        document.getElementById('roomRate').textContent = `$${roomTotal}`;
-        document.getElementById('taxesAndFees').textContent = `$${taxesAndFees.toFixed(2)}`;
-        document.getElementById('diningTotal').textContent = `$${diningTotal}`;
-        document.getElementById('servicesTotal').textContent = `$${servicesTotal}`;
-        document.getElementById('finalTotal').textContent = `$${(roomTotal + taxesAndFees + diningTotal + servicesTotal).toFixed(2)}`;
-        
-        // Update hidden form inputs
-        roomRateInput.value = roomTotal;
-        taxesAndFeesInput.value = taxesAndFees;
-        diningTotalInput.value = diningTotal;
-        servicesTotalInput.value = servicesTotal;
-        totalPriceInput.value = roomTotal + taxesAndFees + diningTotal + servicesTotal;
-
-        // Update room type input
-        roomTypeInput.value = selectedRoom.querySelector('h3').textContent;
-
-        // Update summary
-        const selectedRoomType = selectedRoom.querySelector('h3').textContent;
-        const summaryText = `${nights} night(s) in ${selectedRoomType}`;
-        document.getElementById('summaryText').textContent = summaryText;
-
-        // Update detailed summary
-        let detailedSummary = `
-            Check-in: ${checkIn.value} (2:00 PM)<br>
-            Check-out: ${checkOut.value} (12:00 PM)<br>
-            Guests: ${guestsSelect.value}<br>
-            Bed: ${bedPreference.options[bedPreference.selectedIndex].text}<br>
-            Room Rate: $${roomPrice}/night<br>
-            Length of Stay: ${nights} night(s)<br>
-            <br>
-            Price Breakdown:<br>
-            Room Total: $${roomTotal}<br>
-            Taxes & Fees: $${taxesAndFees.toFixed(2)}<br>
-            Dining: $${diningTotal}<br>
-            Additional Services: $${servicesTotal}<br>
-            Total: $${(roomTotal + taxesAndFees + diningTotal + servicesTotal).toFixed(2)}
-        `;
-        document.getElementById('detailedSummary').innerHTML = detailedSummary;
-    }
-
-    roomTypes.forEach(room => {
-        room.addEventListener('click', () => {
-            roomTypes.forEach(r => r.classList.remove('selected'));
-            room.classList.add('selected');
-            updateTotalPrice();
-        });
-    });
-
-    // Add event listeners for all form controls
-    [checkIn, checkOut, bedPreference, guestsSelect].forEach(el => {
-        el.addEventListener('change', updateTotalPrice);
-    });
+      }
     
-    extras.forEach(extra => {
-        extra.addEventListener('change', () => {
-            // Prevent selecting multiple dining packages
-            if (['breakfast', 'halfboard', 'fullboard'].includes(extra.value) && extra.checked) {
-                extras.forEach(e => {
-                    if (['breakfast', 'halfboard', 'fullboard'].includes(e.value) && e !== extra) {
-                        e.checked = false;
-                    }
-                });
-            }
-            updateTotalPrice();
+      function updateGuestOptions(maxGuests) {
+        Array.from(guestSelect.options).forEach(opt => {
+          const adults   = parseInt(opt.dataset.adults   || 0, 10);
+          const children = parseInt(opt.dataset.children || 0, 10);
+          const total    = adults + children;
+          opt.hidden = total > maxGuests;
         });
-    });
-
-    // Add validation for guest capacity
-    guestsSelect.addEventListener('change', function() {
-        const selectedRoom = document.querySelector('.room-type.selected');
-        const roomType = selectedRoom.querySelector('h3').textContent;
-        const guests = getNumGuests();
-        
-        if ((roomType === 'Standard Garden View' && guests.total > 2) ||
-            (roomType === 'Deluxe Ocean View' && guests.total > 4) ||
-            (roomType === 'Executive Suite with Private Pool' && guests.total > 5) ||
-            (roomType === 'Presidential Beach Villa' && guests.total > 8)) {
-            alert('Selected room type cannot accommodate this many guests. Please choose a larger room or reduce the number of guests.');
-            this.value = '2 Adults';
-            updateTotalPrice();
+        if (guestSelect.selectedOptions[0]?.hidden) {
+          const firstVisible = Array.from(guestSelect.options).find(o => !o.hidden);
+          if (firstVisible) guestSelect.value = firstVisible.value;
         }
+      }
+    
+      function updateTotalPrice() {
+        if (!checkIn.value || !checkOut.value) return;
+        const sel       = document.querySelector('.room-type.selected');
+        const basePrice = parseFloat(sel.dataset.price)     || 0;
+        const maxGuests = parseInt(sel.dataset.maxGuests)   || 1;
+        updateGuestOptions(maxGuests);
+    
+        const d1     = new Date(checkIn.value), d2 = new Date(checkOut.value);
+        const nights = (d2 - d1) / (1000*60*60*24);
+        if (nights <= 0) return;
+    
+        const guests = getNumGuests();
+        let roomTotal = basePrice * nights;
+        if (bedPrefSelect.value.includes('extra')) {
+          roomTotal += 50 * nights;
+        }
+        const taxTotal = roomTotal * 0.12;
+    
+        let diningTotal = 0;
+        const chosenDining = document.querySelector('input[name="dining_package"]:checked');
+        if (chosenDining) {
+          const price = parseFloat(chosenDining.dataset.price) || 0;
+          diningTotal = price * guests.total * nights;
+        }
+    
+        let servicesTotal = 0;
+        serviceBoxes.forEach(cb => {
+          if (!cb.checked) return;
+          const price = parseFloat(cb.dataset.price) || 0;
+          const name  = cb.dataset.name.toLowerCase();
+          servicesTotal += name.includes('spa')
+            ? price * guests.total
+            : price;
+        });
+    
+        const grandTotal = roomTotal + taxTotal + diningTotal + servicesTotal;
+    
+        document.getElementById('roomRate').textContent       = `$${roomTotal.toFixed(2)}`;
+        document.getElementById('taxesAndFees').textContent   = `$${taxTotal.toFixed(2)}`;
+        document.getElementById('diningTotal').textContent    = `$${diningTotal.toFixed(2)}`;
+        document.getElementById('servicesTotal').textContent  = `$${servicesTotal.toFixed(2)}`;
+        document.getElementById('finalTotal').textContent     = `$${grandTotal.toFixed(2)}`;
+    
+        roomRateInput.value   = roomTotal.toFixed(2);
+        taxesInput.value      = taxTotal.toFixed(2);
+        diningInput.value     = diningTotal.toFixed(2);
+        servicesInput.value   = servicesTotal.toFixed(2);
+        totalPriceInput.value = grandTotal.toFixed(2);
+        roomTypeInput.value   = sel.dataset.roomTypeId;
+      }
+    
+      roomTypes.forEach(r => {
+        r.addEventListener('click', () => {
+          roomTypes.forEach(x => x.classList.remove('selected'));
+          r.classList.add('selected');
+          updateTotalPrice();
+        });
+      });
+    
+      [ checkIn, checkOut, bedPrefSelect, guestSelect ]
+        .forEach(el => el.addEventListener('change', updateTotalPrice));
+      serviceBoxes.forEach(cb => cb.addEventListener('change', updateTotalPrice));
+      diningRadios.forEach(rb => rb.addEventListener('change', updateTotalPrice));
+    
+      updateTotalPrice();
+    
+      // Gallery swap
+      document.querySelectorAll('.room-gallery img').forEach(img => {
+        img.addEventListener('click', function() {
+          const main = this.closest('.room-type').querySelector('.main-image');
+          [ main.src, this.src ] = [ this.src, main.src ];
+        });
+      });
     });
-
-    // Initial price update
-    updateTotalPrice();
-});
-
-// Add image gallery functionality
-document.querySelectorAll('.room-gallery img').forEach(img => {
-    img.addEventListener('click', function() {
-        const mainImage = this.closest('.room-type').querySelector('.main-image');
-        const tempSrc = mainImage.src;
-        mainImage.src = this.src;
-        this.src = tempSrc;
-    });
-});
-</script>
+    </script>
+    
 {% endblock %} 

@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block body %}
+  <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mb-3">← Dashboard</a>
+  <h2>Extra Services</h2>
+  <a href="{{ url_for('admin_create_extra_service') }}" class="btn btn-primary mb-3">+ New Service</a>
+  <table class="table table-hover">
+    <thead class="table-light">
+      <tr><th>ID</th><th>Name</th><th>Price</th><th>Type</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for s in services %}
+      <tr>
+        <td>{{ s.id }}</td>
+        <td>{{ s.name }}</td>
+        <td>${{ s.price }}</td>
+        <td>{{ s.type }}</td>
+        <td>
+          <a href="{{ url_for('admin_edit_extra_service', svc_id=s.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+          <a href="{{ url_for('admin_delete_extra_service', svc_id=s.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete?');">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

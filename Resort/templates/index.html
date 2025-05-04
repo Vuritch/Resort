@@ -219,20 +219,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Counter animation
     const counters = document.querySelectorAll('.counter');
     counters.forEach(counter => {
-        const target = +counter.innerText;
+        const target = +counter.innerText.replace(/\D/g, '');
         const increment = target / 50;
         let current = 0;
-        
+
         const updateCounter = () => {
             if(current < target) {
                 current += increment;
                 counter.innerText = Math.ceil(current);
                 setTimeout(updateCounter, 20);
             } else {
-                counter.innerText = target;
+                counter.innerText = target.toLocaleString();
             }
         };
-        
+
         updateCounter();
     });
 });

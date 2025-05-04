@@ -1,21 +1,14 @@
 from flask import render_template, request, redirect, url_for, flash, session
-from Resort.models import db, User, Booking
+from Resort.models import  db, User,Room, ExtraService, Booking, BookingExtraService,RoomType,GuestOption
 from Resort.forms import LoginForm, RegisterForm
 from app import app
 from datetime import timedelta, datetime
 from functools import wraps
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Initialize Flask-Login
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-login_manager.login_message = 'Please login to access the booking page.'
-login_manager.login_message_category = 'warning'
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
 
 @app.route('/')
 def index():
@@ -44,7 +37,8 @@ def register():
             flash("Email already registered. Please use a different email or login.", "danger")
             return render_template("register.html", form=form)
             
-        new_user = User(name=form.name.data, email=form.email.data, password=form.password.data)
+        new_user = User(name=form.name.data, email=form.email.data)
+        new_user.set_password(form.password.data)
         db.session.add(new_user)
         db.session.commit()
         flash("Registration successful! Please login.", "success")
@@ -60,104 +54,143 @@ def logout():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-        
     form = LoginForm()
     if form.validate_on_submit():
-        email = form.email.data
-        password = form.password.data
-        user = User.query.filter_by(email=email, password=password).first()
-
-        if user:
-            login_user(user, remember=form.remember.data)  # Use Flask-Login's login_user
-            session["show_welcome"] = True
-            
-            if form.remember.data:
-                app.permanent_session_lifetime = timedelta(days=30)
-            
-            return redirect(url_for('index'))
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and check_password_hash(user.password_hash, form.password.data):
+            login_user(user, remember=form.remember.data)
+            session['show_welcome'] = True
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('index'))
         else:
             flash('Invalid email or password. Please try again.', 'danger')
+            # DON'T redirect here — keep rendering with flash
 
-    return render_template('login.html', form=form,title='Login')
+  
 
-# The custom login_required decorator is now removed, using Flask-Login's instead
+    return render_template('login.html', form=form)
+
+
+
 
 @app.route("/booking", methods=['GET', 'POST'])
-@login_required  # Using Flask-Login's login_required decorator
+@login_required
 def booking():
+    today = datetime.now().date().isoformat()
+    room_types = RoomType.query.options(db.joinedload(RoomType.rooms)).all()
+    extra_services = ExtraService.query.all()
+    dining_extras = ExtraService.query.filter_by(type='dining').all()
+    service_extras = ExtraService.query.filter_by(type='service').all()
+    bed_extras = ExtraService.query.filter_by(type='bed').all()
+    guest_options = GuestOption.query.\
+         order_by(GuestOption.adult_count, GuestOption.child_count).all()
     if request.method == 'POST':
         try:
-            # Get basic form data
-            check_in = datetime.strptime(request.form.get('check_in'), '%Y-%m-%d').date()
-            check_out = datetime.strptime(request.form.get('check_out'), '%Y-%m-%d').date()
-            room_type = request.form.get('room_type')
-            guests = request.form.get('guests')
+            # basic form fields
+            room_type_id = int(request.form['room_type_id'])
+            check_in  = datetime.strptime(request.form['check_in'], '%Y-%m-%d').date()
+            check_out = datetime.strptime(request.form['check_out'], '%Y-%m-%d').date()
+            special_requests = request.form.get('special_requests','')
+
+            # fetch the selected GuestOption by its ID
+            guest_option_id = int(request.form['guests'])
+            guest_opt = GuestOption.query.get(guest_option_id)
+            if not guest_opt:
+                flash("Invalid guest selection.", "danger")
+                return redirect(url_for('booking'))
+
+            adults   = guest_opt.adult_count
+            children = guest_opt.child_count
+            total    = adults + children
+
+
+            # load room_type and enforce max_guests
+            room_type = RoomType.query.get(room_type_id)
+            if not room_type:
+                flash("Room type not found.", "danger")
+                return redirect(url_for('booking'))
+            if total > room_type.max_guests:
+                flash(f"That room holds up to {room_type.max_guests} guests only.", "warning")
+                return redirect(url_for('booking'))
+
+            # extras/dining/bed as before …
+            extras       = request.form.getlist('extras')
+            dining_pkg   = request.form.get('dining_package')
+            # … split out bed_pref and service_extras …
+
+            # financials from hidden inputs
+            room_rate    = float(request.form.get('room_rate', 0))
+            taxes_and_fees = float(request.form.get('taxes_and_fees',0))
+            dining_total = float(request.form.get('dining_total',0))
+            services_total = float(request.form.get('services_total',0))
+            total_price  = float(request.form.get('total_price',0))
             
-            # Get additional form data
-            child_ages = ','.join(request.form.getlist('child_ages')) if request.form.getlist('child_ages') else None
-            bed_preference = request.form.get('bed_preference')
-            special_requests = request.form.get('special_requests')
-            
-            # Get extras (dining and services)
-            extras = request.form.getlist('extras')
-            dining_package = next((extra for extra in extras if extra in ['breakfast', 'halfboard', 'fullboard']), None)
-            airport_transfer = 'airport' in extras
-            spa_package = 'spa' in extras
-            romantic_package = 'romantic' in extras
-            
-            # Get price breakdown
-            room_rate = float(request.form.get('room_rate', 0))
-            taxes_and_fees = float(request.form.get('taxes_and_fees', 0))
-            dining_total = float(request.form.get('dining_total', 0))
-            services_total = float(request.form.get('services_total', 0))
-            total_price = float(request.form.get('total_price'))
-            
-          
-            # Create new booking
-            new_booking = Booking(
-                user_id=current_user.id,  # Use current_user instead of session
-                room_type=room_type,
+            # pick an available room
+            room = Room.query.filter_by(room_type_id=room_type_id, is_available=True).first()
+            if not room:
+                flash("No available rooms of that type.", "danger")
+                return redirect(url_for('booking'))
+
+            # create booking
+            booking = Booking(
+                user_id=current_user.id,
+                room_id=room.id,
                 check_in=check_in,
                 check_out=check_out,
-                guests=guests,
-                child_ages=child_ages,
-                bed_preference=bed_preference,
-                dining_package=dining_package,
-                airport_transfer=airport_transfer,
-                spa_package=spa_package,
-                romantic_package=romantic_package,
+                bed_preference=request.form.get('bed_preference',''),
+                dining_package = ExtraService.query.get(int(dining_pkg)).name if dining_pkg else None,
                 room_rate=room_rate,
                 taxes_and_fees=taxes_and_fees,
                 dining_total=dining_total,
                 services_total=services_total,
                 total_price=total_price,
+                
+                # new columns (if you added them)
+                num_adults=adults,
+                num_children=children,
+
                 special_requests=special_requests,
                 status='pending'
             )
-            
-            # Save to database
-            db.session.add(new_booking)
+            db.session.add(booking)
+            db.session.flush()  # so booking.id exists
+
+            # record each child’s age category
+            for age_cat in request.form.getlist('child_ages'):
+                db.session.add(BookingGuest(booking_id=booking.id, age=age_cat))
+
+            # optionally, record adults as BookingGuest rows (if you want names later)
+            # for _ in range(adults):
+            #     db.session.add(BookingGuest(booking_id=booking.id, age=18))
+
+            # link service extras as before
+            for e_id in [int(x) for x in extras]:
+                svc = ExtraService.query.get(e_id)
+                if svc and svc.type=='service':
+                    db.session.add(BookingExtraService(
+                        booking_id=booking.id,
+                        extra_service_id=svc.id
+                    ))
+
+            # mark room unavailable
+            room.is_available = False
             db.session.commit()
-            
-            # Send confirmation
-            flash('''Booking request submitted successfully! 
-                  We will confirm your reservation shortly. 
-                  A confirmation email will be sent to your registered email address.''', 'success')
+
+            flash("Booking successful! Check your email for confirmation.", "success")
             return redirect(url_for('booking'))
-            
+
         except Exception as e:
             db.session.rollback()
-            # Print detailed error information
-            import traceback
-            print("Booking Error Details:")
-            print(str(e))
-            print("Traceback:")
-            print(traceback.format_exc())
-            flash('An error occurred while processing your booking. Please try again.', 'danger')
+            flash("Error processing booking: " + str(e), "danger")
             return redirect(url_for('booking'))
-        
-    # For GET request, pass today's date to template for date validation
-    today = datetime.now().date().isoformat()
-    return render_template('booking.html', title='Book Your Stay', today=today)
+
+    return render_template(
+        "booking.html",
+        title="Book Your Stay",
+        today=today,
+        room_types=room_types,
+        dining_extras=dining_extras,
+        service_extras=service_extras,
+        bed_extras=bed_extras,
+         guest_options=guest_options
+    )
